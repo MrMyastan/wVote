@@ -10,6 +10,7 @@ import pickle
 
 current_week = None
 next_week = None
+hall_data = None
 
 
 def blank_week() -> dict:
@@ -279,3 +280,17 @@ def get_ranked_entrant_list(week: dict) -> list:
         e["votePlacement"] = place + 1
 
     return list(reversed(ranked_entries))
+
+def get_hall_data() -> dict:
+    global hall_data
+    if hall_data is None:
+        try:
+            hall_data = pickle.load(open("hall_of_fame.pickle", "rb"))
+        except FileNotFoundError:
+            hall_data = {}
+
+    return hall_data
+
+def save_hall_data() -> None:
+    if hall_data is not None:
+        pickle.dump(hall_data, open("hall_of_fame.pickle", "wb"))

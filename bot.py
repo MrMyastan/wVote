@@ -521,3 +521,25 @@ async def crudbroke(context: commands.Context) -> None:
     message = "Dang, that's happened %d times this week." % week["crudbroke"]
 
     await context.send(message)
+
+@client.command()
+@commands.check(is_admin)
+async def addtohall(context: commands.Context, name: str, discord: str, *links) -> None:
+    hall_data = compo.get_hall_data()
+    user_data = {}
+    user_data["discord"] = discord
+    user_data["links"] = list(links) if links else None
+    hall_data[name] = user_data
+
+    compo.save_hall_data()
+
+    msg = "Success! Added:\n"
+    msg += "Name: %s\nDiscord: %s" % (name, hall_data[name][discord])
+
+    if hall_data[name]["links"]:
+        msg += "\nLinks:\n"
+        for link in hall_data[name]["links"]:
+            msg += link
+
+    await context.send(msg)
+

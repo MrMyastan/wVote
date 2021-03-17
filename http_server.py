@@ -402,6 +402,8 @@ async def allowed_hosts_handler(request: web_request.Request) -> web.Response:
 
     return web.json_response(config["allowed_hosts"])
 
+async def get_hall_data_handler(request: web_request.Request) -> web.Response:
+    return web.json_response(compo.get_hall_data())
 
 # Helpers
 def format_week(week: dict, is_admin: bool) -> dict:
@@ -493,6 +495,7 @@ server.add_routes([
     web.get("/admin/get_preview_data/{authKey}", admin_preview_handler),
     web.get("/admin/preview/{authKey}", vote_handler),
     web.get("/admin/viewvote/{authKey}/{userID}", admin_viewvote_handler),
+    web.get("/hall_data", get_hall_data_handler),
     web.post("/admin/edit/{authKey}", admin_control_handler),
     web.post("/admin/archive/{authKey}", admin_archive_handler),
     web.post("/admin/spoof/{authKey}", admin_spoof_handler),
