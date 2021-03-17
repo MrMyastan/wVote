@@ -1,12 +1,12 @@
 from datetime import datetime, timedelta
+from random import randint
 from string import ascii_letters, digits
 from uuid import uuid4
-import json
 
 import pytest
 import keys
 
-config = json.load(open("botconf.json", "r"))
+config = {"default_ttl": 30}
 keys.configure(config)
 
 class TestKeyValid():
@@ -23,7 +23,7 @@ class TestKeyValid():
     def valid_key(self, multi_run):
         key = multi_run.param[0](*multi_run.param[2])
         yield key, multi_run.param[1], multi_run.param[2]
-        del multi_run.param[1][key]
+        multi_run.param[1].clear()
 
     @pytest.fixture()
     def expired_key(self, multi_run):
@@ -32,7 +32,8 @@ class TestKeyValid():
         full_key = store[key]
         past_ttl = timedelta(minutes=full_key["timeToLive"] + 1)
         full_key["creationTime"] -= past_ttl
-        return key, store, args
+        yield key, store, args
+        multi_run.param[1].clear()
 
     def test_key_valid(self, valid_key):
         assert keys.key_valid(valid_key[0], valid_key[1])
@@ -48,41 +49,34 @@ class TestKeyValid():
         keys.key_valid(key, store)
         assert key not in store
 
-    # everything past here is maybe a little unnecessary but whatevs....
+    # everything past here is maybe a little overkill but whatevs....
     def test_return_bool(self, valid_key, expired_key):
         assert isinstance(keys.key_valid(valid_key[0], valid_key[1]), bool)
         assert isinstance(keys.key_valid(valid_key[0], {}), bool)
         assert isinstance(keys.key_valid(expired_key[0], expired_key[1]), bool)
 
 class TestCreateKey():
-    def test_key_valid_chars(self):
+    @pytest.mark.parametrize("len", [randint(0, 999) for _ in range(12)])
+    def test_key_valid_chars(self, len):
         alphanumeric = ascii_letters + digits
-        passing = True
-        for i in range(12):
-            key = keys.create_key(i)
-            for char in key:
-                if char not in alphanumeric:
-                    passing = False
-                assert passing
+        key = keys.create_key(len)
+        assert all(char in alphanumeric for char in key)
     
-    def test_key_correct_length(self):
-        passing = True
-        for i in range(16):
-            key = keys.create_key(i)
-            if len(key) != i:
-                passing = False
-            assert passing
+    @pytest.mark.parametrize("length", [randint(0, 999) for _ in range(12)])
+    def test_key_correct_length(self, length):
+        key = keys.create_key(length)
+        assert len(key) == length
     
     def test_return_str(self):
         assert isinstance(keys.create_key(8), str)
 
 class TestCreateEditKey():
-    @pytest.fixture(scope="class")
+    @pytest.fixture()
     def edit_key(self):
         uuid = str(uuid4())
         key = keys.create_edit_key(uuid)
         yield key, uuid
-        del keys.edit_keys[key]
+        keys.edit_keys.clear()
     
     def test_return_string(self, edit_key):
         assert type(edit_key[0]) is str
@@ -100,7 +94,7 @@ class TestCreateEditKey():
         key = keys.create_edit_key(str(uuid4()))
         after = datetime.now()
         yield before, key, after
-        del keys.edit_keys[key]
+        keys.edit_keys.clear()
 
     def test_key_creation_time(self, timed_edit_key):
         before, key, after = timed_edit_key
@@ -110,11 +104,11 @@ class TestCreateEditKey():
         assert keys.edit_keys[edit_key[0]]["timeToLive"] == config["default_ttl"]
 
 class TestCreateAdminKey():
-    @pytest.fixture(scope="class")
+    @pytest.fixture()
     def admin_key(self):
         key = keys.create_admin_key()
         yield key
-        del keys.admin_keys[key]
+        keys.admin_keys.clear()
     
     def test_return_string(self, admin_key):
         assert type(admin_key) is str
@@ -128,7 +122,7 @@ class TestCreateAdminKey():
         key = keys.create_admin_key()
         after = datetime.now()
         yield before, key, after
-        del keys.admin_keys[key]
+        keys.admin_keys.clear()
 
     def test_key_creation_time(self, timed_admin_key):
         before, key, after = timed_admin_key
@@ -138,13 +132,13 @@ class TestCreateAdminKey():
         assert keys.admin_keys[admin_key]["timeToLive"] == config["default_ttl"]
 
 class TestCreateVoteKey():
-    @pytest.fixture(scope="class")
+    @pytest.fixture()
     def vote_key(self):
         id = 156896959783895040
         name = "wiggle"
         key = keys.create_vote_key(id, name)
         yield key, id, name
-        del keys.vote_keys[key]
+        keys.vote_keys.clear()
     
     def test_return_string(self, vote_key):
         assert type(vote_key[0]) is str
@@ -164,7 +158,7 @@ class TestCreateVoteKey():
         key = keys.create_vote_key(294207224920670218, "MAYOOOOO")
         after = datetime.now()
         yield before, key, after
-        del keys.vote_keys[key]
+        keys.vote_keys.clear()
 
     def test_key_creation_time(self, timed_vote_key):
         before, key, after = timed_vote_key
