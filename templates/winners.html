@@ -6,7 +6,7 @@
 	<meta name="theme-color" content="#ee34e7">
 	<title>8 Bit Music Theory Weeklies</title>
 	<link rel="stylesheet" href="/static/style.css" type="text/css" media="all">
-	<link rel="stylesheet" href="/static/hall.css" type="text/css" media="all">
+	<link rel="stylesheet" href="/static/winners.css" type="text/css" media="all">
 	<script src="[VUE-URL]"></script>
 </head>
 
@@ -17,18 +17,24 @@
 	<div id="content">
 		<div v-if="working">Loading...</div>
 		<div v-else>
-			<div class="hall-container">
-				<div style="text-align:center;">HALL OF FAME</div>
-				<table cellpadding='0' class='hall-table'>
+			<div class="winners-container">
+				<h2 class="winners-title">HALL OF FAME</h2>
+				<table cellpadding='0' class='winners-table'>
 					<tr class="entry-table-header-row">
 						<th class="entry-table-header">Name</th>
 						<th class="entry-table-header">Discord</th>
 						<th class="entry-table-header">Links</th>
 					</tr>
-					<tr v-for="(data, name) in hallOfFameData">
+					<tr v-for="(data, name) in winnersData">
 						<td class="entry-cell">{{ name }}</td>
 						<td class="entry-cell">{{ data.discord }}</td>
-						<td class="entry-cell">{{ data.links }}</td>
+						<td class="entry-cell">
+							<a v-for="link in data.links" :href="link">
+								<button class="icon-button">
+									<img src="/static/interface-chain.png" alt="Link" />
+								</button>
+							</a>
+						</td>
 					</tr>
 				</table>
 			</div>
@@ -41,7 +47,7 @@
 			el: '#content',
 			data: function () {
 				return {
-					hallOfFameData: null,
+					winnersData: null,
 					mode: null,
 					working: false
 				}
@@ -49,15 +55,15 @@
 			async mounted() {
 				this.working = true;
 
-				let hallResponse;
-				hallResponse = await fetch("/hall_data")
+				let winnersResponse;
+				winnersResponse = await fetch("/winners_data")
 				
-				if (!hallResponse.ok) {
-					alert("Something went wrong: " + await hallResponse.text());
+				if (!winnersResponse.ok) {
+					alert("Something went wrong: " + await winnersResponse.text());
 				} else {
-					let hallData = await hallResponse.json()
+					let winnersResponseData = await winnersResponse.json()
 
-					this.hallOfFameData = hallData
+					this.winnersData = winnersResponseData
 				}
 
 				this.working = false;

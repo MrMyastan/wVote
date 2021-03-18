@@ -15,7 +15,7 @@ config = None
 vote_template = open("templates/vote.html", "r").read()
 submit_template = open("templates/submit.html", "r").read()
 admin_template = open("templates/admin.html", "r").read()
-hall_template = open("templates/hall_of_fame.html", "r").read()
+winners_template = open("templates/winners.html", "r").read()
 
 favicon = open("static/favicon.ico", "rb").read()
 
@@ -403,14 +403,14 @@ async def allowed_hosts_handler(request: web_request.Request) -> web.Response:
 
     return web.json_response(config["allowed_hosts"])
 
-async def hall_handler(request: web_request.Request) -> web.Response:
+async def winners_handler(request: web_request.Request) -> web.Response:
     """Display the vote form (No data; will be fetched by Vue)"""
-    html = hall_template.replace("[VUE-URL]", get_vue_url())
+    html = winners_template.replace("[VUE-URL]", get_vue_url())
 
     return web.Response(text=html, content_type="text/html")
 
-async def get_hall_data_handler(request: web_request.Request) -> web.Response:
-    return web.json_response(compo.get_hall_data())
+async def get_winners_data_handler(request: web_request.Request) -> web.Response:
+    return web.json_response(compo.get_winners_data())
 
 # Helpers
 def format_week(week: dict, is_admin: bool) -> dict:
@@ -502,8 +502,8 @@ server.add_routes([
     web.get("/admin/get_preview_data/{authKey}", admin_preview_handler),
     web.get("/admin/preview/{authKey}", vote_handler),
     web.get("/admin/viewvote/{authKey}/{userID}", admin_viewvote_handler),
-    web.get("/hall", hall_handler),
-    web.get("/hall_data", get_hall_data_handler),
+    web.get("/winners", winners_handler),
+    web.get("/winners_data", get_winners_data_handler),
     web.post("/admin/edit/{authKey}", admin_control_handler),
     web.post("/admin/archive/{authKey}", admin_archive_handler),
     web.post("/admin/spoof/{authKey}", admin_spoof_handler),

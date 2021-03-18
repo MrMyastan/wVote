@@ -524,48 +524,16 @@ async def crudbroke(context: commands.Context) -> None:
     await context.send(message)
 
 @client.command()
-@commands.check(is_admin)
-async def addtohall(context: commands.Context, name: str, discord: str, *links) -> None:
-    hall_data = compo.get_hall_data()
-    user_data = {}
-    user_data["discord"] = discord
-    user_data["links"] = list(links) if links else None
-    hall_data[name] = user_data
-
-    compo.save_hall_data()
-
-    msg = []
-    msg.append("Success! Added:")
-    msg.append("Name: %s\nDiscord: %s" % (name, hall_data[name]["discord"]))
-
-    if hall_data[name]["links"]:
-        msg.append("Links:")
-        for link in hall_data[name]["links"]:
-            msg.append(link)
-
-    await context.send('\n'.join(msg))
-
-@client.command()
-@commands.check(is_admin)
-async def removefromhall(context: commands.Context, name) -> None:
-    hall_data = compo.get_hall_data()
-    if name not in hall_data:
-        await context.send("There's no hall of famer with that name")
-        return
-    del hall_data[name]
-    await context.send("Success! Removed %s from the hall of fame" % name)
-
-@client.command()
 async def halloffame(context: commands.Context) -> None:
-    hall_data = compo.get_hall_data()
+    winners_data = compo.get_winners_data()
     messages = []
     
-    for name in hall_data:
+    for name in winners_data:
         msg = []
-        msg.append("Name: %s\nDiscord: %s" % (name, hall_data[name]["discord"]))
-        if hall_data[name]["links"]:
+        msg.append("Name: %s\nDiscord: %s" % (name, winners_data[name]["discord"]))
+        if winners_data[name]["links"]:
             msg.append("Links:")
-            for link in hall_data[name]["links"]:
+            for link in winners_data[name]["links"]:
                 msg.append(link)
         messages.append(msg)
 

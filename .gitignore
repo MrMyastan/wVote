@@ -9,4 +9,4 @@
 /logs/*.log
 /logs/*.log.*
 /botconf.json
-/hall_of_fame.pickle
+/winners.json

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import datetime
+import json
 import uuid
 import logging
 import statistics
@@ -10,7 +11,7 @@ import pickle
 
 current_week = None
 next_week = None
-hall_data = None
+winners_data = None
 
 
 def blank_week() -> dict:
@@ -281,16 +282,16 @@ def get_ranked_entrant_list(week: dict) -> list:
 
     return list(reversed(ranked_entries))
 
-def get_hall_data() -> dict:
-    global hall_data
-    if hall_data is None:
+def get_winners_data() -> dict:
+    global winners_data
+    if winners_data is None:
         try:
-            hall_data = pickle.load(open("hall_of_fame.pickle", "rb"))
+            winners_data = json.load(open("winners.json", "r"))
         except FileNotFoundError:
-            hall_data = {}
+            winners_data = {}
 
-    return hall_data
+    return winners_data
 
-def save_hall_data() -> None:
-    if hall_data is not None:
-        pickle.dump(hall_data, open("hall_of_fame.pickle", "wb"))
+def save_winners_data() -> None:
+    if winners_data is not None:
+        json.dump(winners_data, open("winners.json", "w"))
