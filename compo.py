@@ -287,6 +287,11 @@ def get_winners_data() -> dict:
     if winners_data is None:
         try:
             winners_data = json.load(open("winners.json", "r"))
+            for id in winners_data:
+                try:
+                    winners_data[int(id)] = winners_data.pop(id)
+                except ValueError:
+                    del winners_data[id]   
         except FileNotFoundError:
             winners_data = {}
 

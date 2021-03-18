@@ -528,12 +528,18 @@ async def halloffame(context: commands.Context) -> None:
     winners_data = compo.get_winners_data()
     messages = []
     
-    for name in winners_data:
+    for id in winners_data:
         msg = []
-        msg.append("Name: %s\nDiscord: %s" % (name, winners_data[name]["discord"]))
-        if winners_data[name]["links"]:
+        
+        winner = client.get_user(id)
+        if winner is None:
+            continue
+        winner_discord = winner.name + "#" + winner.discriminator
+        
+        msg.append("Name: %s\nDiscord: %s" % (winners_data[id]["name"], winner_discord))
+        if winners_data[id]["links"]:
             msg.append("Links:")
-            for link in winners_data[name]["links"]:
+            for link in winners_data[id]["links"]:
                 msg.append(link)
         messages.append(msg)
 

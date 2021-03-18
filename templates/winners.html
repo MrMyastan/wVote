@@ -25,8 +25,8 @@
 						<th class="entry-table-header">Discord</th>
 						<th class="entry-table-header">Links</th>
 					</tr>
-					<tr v-for="(data, name) in winnersData">
-						<td class="entry-cell">{{ name }}</td>
+					<tr v-for="data in winnersData">
+						<td class="entry-cell">{{ data.name }}</td>
 						<td class="entry-cell">{{ data.discord }}</td>
 						<td class="entry-cell">
 							<a v-for="link in data.links" :href="link">

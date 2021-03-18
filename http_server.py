@@ -410,7 +410,17 @@ async def winners_handler(request: web_request.Request) -> web.Response:
     return web.Response(text=html, content_type="text/html")
 
 async def get_winners_data_handler(request: web_request.Request) -> web.Response:
-    return web.json_response(compo.get_winners_data())
+    winners_data = compo.get_winners_data()
+    return_dict = {}
+    
+    for id in winners_data:
+        winner = bot.client.get_user(id)
+        if winner is None:
+            continue
+        winner_discord = winner.name + "#" + winner.discriminator
+        return_dict[id] = { "discord": winner_discord }.update(winners_data[id])
+    
+    return web.json_response(return_dict)
 
 # Helpers
 def format_week(week: dict, is_admin: bool) -> dict:
