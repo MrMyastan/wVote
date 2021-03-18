@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import asyncio
+from inspect import isabstract
 import io
 import urllib.parse
 import logging
@@ -533,13 +534,41 @@ async def addtohall(context: commands.Context, name: str, discord: str, *links) 
 
     compo.save_hall_data()
 
-    msg = "Success! Added:\n"
-    msg += "Name: %s\nDiscord: %s" % (name, hall_data[name][discord])
+    msg = []
+    msg.append("Success! Added:")
+    msg.append("Name: %s\nDiscord: %s" % (name, hall_data[name]["discord"]))
 
     if hall_data[name]["links"]:
-        msg += "\nLinks:\n"
+        msg.append("Links:")
         for link in hall_data[name]["links"]:
-            msg += link
+            msg.append(link)
 
-    await context.send(msg)
+    await context.send('\n'.join(msg))
 
+@client.command()
+@commands.check(is_admin)
+async def removefromhall(context: commands.Context, name) -> None:
+    hall_data = compo.get_hall_data()
+    if name not in hall_data:
+        await context.send("There's no hall of famer with that name")
+        return
+    del hall_data[name]
+    await context.send("Success! Removed %s from the hall of fame" % name)
+
+@client.command()
+async def halloffame(context: commands.Context) -> None:
+    hall_data = compo.get_hall_data()
+    messages = []
+    
+    for name in hall_data:
+        msg = []
+        msg.append("Name: %s\nDiscord: %s" % (name, hall_data[name]["discord"]))
+        if hall_data[name]["links"]:
+            msg.append("Links:")
+            for link in hall_data[name]["links"]:
+                msg.append(link)
+        messages.append(msg)
+
+    async with context.typing():
+        for msg in messages:
+            await context.send('\n'.join(msg))
